@@ -6,12 +6,15 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "postcss": "^8.4.24",
+    "postcss-safe-parser": "^6.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "react-scripts": "4.0.0",
+    "react-scripts": "^5.0.1",
+    "sass": "^1.83.1",
     "twilio-video": "^2.7.3",
-    "web-vitals": "^0.2.4",
-    "node-sass": "^4.14.1"
+    "util": "^0.12.5",
+    "web-vitals": "^0.2.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -36,5 +39,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "webpack": "^5.97.1"
   }
 }
