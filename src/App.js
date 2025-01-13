@@ -20,9 +20,13 @@ class App extends Component {
 
         this.inputRef = React.createRef(); // Initialize the ref properly
     }
-
     async joinRoom() {
         try {
+            console.log('Requesting media permissions...');
+            await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+            console.log('Permissions granted.');
+
+            console.log('Fetching token...');
             const response = await fetch('https://ef3d-2a01-799-175a-8600-8036-cf54-c3e0-5a6b.ngrok-free.app/token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -32,17 +36,51 @@ class App extends Component {
                 }),
             });
             const data = await response.json();
+            console.log('Token fetched:', data);
+
+            console.log('Connecting to room...');
             const room = await connect(data.token, {
                 name: 'cool-room',
                 audio: true,
-                video: true,
+                video: {
+                    width: 640,      // Optimize for 640x480 resolution
+                    height: 480,
+                    frameRate: 15,   // Limit frame rate to 15fps for smoother performance on mobile
+                },
+                networkQuality: { local: 1, remote: 1 }, // Minimal network quality level to save bandwidth
+                maxAudioBitrate: 16000, // Limit audio bitrate for mobile performance
             });
+            console.log('Connected to room.');
 
-            this.setState({ room: room });
+            this.setState({ room });
         } catch (err) {
-            console.log(err);
+            console.error('Error during joinRoom:', err);
         }
     }
+
+
+    // async joinRoom() {
+    //     try {
+    //         const response = await fetch('https://ef3d-2a01-799-175a-8600-8036-cf54-c3e0-5a6b.ngrok-free.app/token', {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify({
+    //                 username: this.state.identity,
+    //                 room: 'cool-room',
+    //             }),
+    //         });
+    //         const data = await response.json();
+    //         const room = await connect(data.token, {
+    //             name: 'cool-room',
+    //             audio: true,
+    //             video: true,
+    //         });
+
+    //         this.setState({ room: room });
+    //     } catch (err) {
+    //         console.log(err);
+    //     }
+    // }
 
     returnToLobby() {
         this.setState({ room: null });
