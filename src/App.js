@@ -23,7 +23,7 @@ class App extends Component {
 
     async joinRoom() {
         try {
-            const response = await fetch('http://localhost:9000/token', {
+            const response = await fetch('https://ef3d-2a01-799-175a-8600-8036-cf54-c3e0-5a6b.ngrok-free.app/token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
