@@ -1,77 +1,83 @@
-import './App.scss';
-
-
-
 import React, { Component } from 'react';
 import Participant from './Participant';
-import { connect } from 'twilio-video';
-
+import './App.scss';
 class Room extends Component {
-  state = {
-    participants: [], // List of participants in the room
-  };
+    constructor(props) {
+        super(props);
 
-  // Called when the component is mounted
-  componentDidMount() {
-    const { token, roomName } = this.props; // Get token and room name from props
+        this.state = {
+            remoteParticipants: Array.from(this.props.room.participants.values()),
+        };
 
-    // Connect to the Twilio Video room
-    connect(token, { name: roomName }).then((room) => {
-      this.room = room;
+        this.leaveRoom = this.leaveRoom.bind(this);
+        this.addParticipant = this.addParticipant.bind(this);
+        this.removeParticipant = this.removeParticipant.bind(this);
+    }
 
-      // Add existing participants to the state
-      this.setState({
-        participants: Array.from(room.participants.values()),
-      });
+    componentDidMount() {
+        // Add event listeners for future remote participants coming or going
+        this.props.room.on('participantConnected', this.addParticipant);
+        this.props.room.on('participantDisconnected', this.removeParticipant);
 
-      // Listen for new participants joining
-      room.on('participantConnected', this.handleParticipantConnected);
+        window.addEventListener('beforeunload', this.leaveRoom);
+    }
 
-      // Listen for participants leaving
-      room.on('participantDisconnected', this.handleParticipantDisconnected);
-    });
-  }
+    componentWillUnmount() {
+        // Clean up event listeners when the component is unmounted
+        this.props.room.off('participantConnected', this.addParticipant);
+        this.props.room.off('participantDisconnected', this.removeParticipant);
 
-  // Cleanup when the component is unmounted
-  componentWillUnmount() {
-    // Disconnect from the room
-    this.room.disconnect();
-  }
+        window.removeEventListener('beforeunload', this.leaveRoom);
 
-  // Handler for when a new participant connects
-  handleParticipantConnected = (participant) => {
-    this.setState((prevState) => ({
-      participants: [...prevState.participants, participant],
-    }));
-  };
+        // Disconnect from the room if still connected
+        this.leaveRoom();
+    }
 
-  // Handler for when a participant disconnects
-  handleParticipantDisconnected = (participant) => {
-    this.setState((prevState) => ({
-      participants: prevState.participants.filter((p) => p !== participant),
-    }));
-  };
+    addParticipant(participant) {
+        console.log(`${participant.identity} has joined the room.`);
 
-  render() {
-    const { roomName, handleLogout } = this.props; // Get props
+        this.setState(prevState => ({
+            remoteParticipants: [...prevState.remoteParticipants, participant],
+        }));
+    }
 
-    return (
-      <div className="room">
-        <h2>Room: {roomName}</h2>
-        <button onClick={handleLogout}>Leave Room</button>
+    removeParticipant(participant) {
+        console.log(`${participant.identity} has left the room`);
 
-        {/* Render each participant */}
-        <div className="participants">
-          {this.state.participants.map((participant) => (
-            <Participant
-              key={participant.sid} // Unique identifier for the participant
-              participant={participant} // Pass the participant object
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
+        this.setState(prevState => ({
+            remoteParticipants: prevState.remoteParticipants.filter(
+                p => p.identity !== participant.identity
+            ),
+        }));
+    }
+
+    leaveRoom() {
+        if (this.props.room) {
+            console.log('Disconnecting from room...');
+            this.props.room.disconnect();
+        }
+        this.props.returnToLobby();
+    }
+
+    render() {
+        return (
+            <div className="room">
+                <div className="participants">
+                    <Participant
+                        key={this.props.room.localParticipant.identity}
+                        localParticipant={true}
+                        participant={this.props.room.localParticipant}
+                    />
+                    {this.state.remoteParticipants.map(participant => (
+                        <Participant key={participant.identity} participant={participant} />
+                    ))}
+                </div>
+                <button id="leaveRoom" onClick={this.leaveRoom}>
+                    Leave Room
+                </button>
+            </div>
+        );
+    }
 }
 
 export default Room;
