@@ -10,17 +10,24 @@
     "postcss-safe-parser": "^6.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-router-dom": "^5.3.4",
     "react-scripts": "^5.0.1",
     "sass": "^1.83.1",
     "twilio-video": "^2.7.3",
     "util": "^0.12.5",
     "web-vitals": "^0.2.4"
   },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "webpack": "^5.97.1"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -40,7 +47,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "webpack": "^5.97.1"
-  }
+  "homepage": "https://mohammedali201.github.io/twillio-video"
 }
