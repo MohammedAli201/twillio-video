@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/twillio-video/static/css/main.3d6d681f.css",
-    "main.js": "/twillio-video/static/js/main.87a17128.js",
+    "main.js": "/twillio-video/static/js/main.b5602ca4.js",
     "static/js/422.4c935b6d.chunk.js": "/twillio-video/static/js/422.4c935b6d.chunk.js",
     "index.html": "/twillio-video/index.html",
     "main.3d6d681f.css.map": "/twillio-video/static/css/main.3d6d681f.css.map",
-    "main.87a17128.js.map": "/twillio-video/static/js/main.87a17128.js.map",
+    "main.b5602ca4.js.map": "/twillio-video/static/js/main.b5602ca4.js.map",
     "422.4c935b6d.chunk.js.map": "/twillio-video/static/js/422.4c935b6d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3d6d681f.css",
-    "static/js/main.87a17128.js"
+    "static/js/main.b5602ca4.js"
   ]
 }
