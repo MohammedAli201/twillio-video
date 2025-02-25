@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/MohammedAli201/twillio-video/static/css/main.3d6d681f.css",
-    "main.js": "/MohammedAli201/twillio-video/static/js/main.cdc8d07a.js",
+    "main.js": "/MohammedAli201/twillio-video/static/js/main.01f1e8f1.js",
     "static/js/422.4c935b6d.chunk.js": "/MohammedAli201/twillio-video/static/js/422.4c935b6d.chunk.js",
     "index.html": "/MohammedAli201/twillio-video/index.html",
     "main.3d6d681f.css.map": "/MohammedAli201/twillio-video/static/css/main.3d6d681f.css.map",
-    "main.cdc8d07a.js.map": "/MohammedAli201/twillio-video/static/js/main.cdc8d07a.js.map",
+    "main.01f1e8f1.js.map": "/MohammedAli201/twillio-video/static/js/main.01f1e8f1.js.map",
     "422.4c935b6d.chunk.js.map": "/MohammedAli201/twillio-video/static/js/422.4c935b6d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3d6d681f.css",
-    "static/js/main.cdc8d07a.js"
+    "static/js/main.01f1e8f1.js"
   ]
 }
