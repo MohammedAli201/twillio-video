@@ -226,8 +226,6 @@
 import './App.scss';
 import React, { Component } from 'react';
 import Room from './Room';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-
 export const MAIN_API_URL = "https://bariiso.com";
 const { connect } = require('twilio-video');
 
@@ -260,25 +258,37 @@ class App extends Component {
                     identity: decodeURIComponent(name),
                     roomName: decodeURIComponent(roomName),
                 },
-                this.joinRoom // Automatically call joinRoom
+                this.joinRoom // Automatically join the room
             );
         }
     }
 
     async joinRoom() {
         try {
+            console.log('[joinRoom] Requesting media permissions...');
             await this.requestMediaPermissions();
+            console.log('[joinRoom] Media permissions granted.');
+
+            console.log('[joinRoom] Extracting URL parameters...');
             const { token, roomName, userName } = this.extractUrlParameters();
+
             if (!token || !roomName || !userName) {
                 throw new Error('Missing required URL parameters (token, roomName, or userName).');
             }
+            console.log('[joinRoom] Parameters extracted:', { token, roomName, userName });
 
+            console.log('[joinRoom] Fetching token from API...');
             const fetchedToken = await this.fetchRoomToken(token, roomName, userName);
+
+            console.log('[joinRoom] Connecting to the room...');
             const room = await this.connectToRoom(fetchedToken, roomName);
+            console.log('[joinRoom] Connected to room successfully.');
+
+            // Update state with the connected room
             this.setState({ room });
         } catch (err) {
             console.error('[joinRoom] Error occurred:', err);
-            this.setState({ errorMessage: 'An error occurred while connecting to the room.', showErrorPage: true });
+            this.handleJoinRoomError(err);
         }
     }
 
@@ -286,7 +296,7 @@ class App extends Component {
         try {
             await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
         } catch (err) {
-            console.error('[requestMediaPermissions] Failed:', err);
+            console.error('[requestMediaPermissions] Failed to get media permissions:', err);
             throw new Error('Unable to access camera or microphone. Please grant permissions.');
         }
     }
@@ -302,8 +312,9 @@ class App extends Component {
 
     async fetchRoomToken(token, roomName, userName) {
         const apiUrl = `${MAIN_API_URL}/api/Doctor/resource`;
-        const requestBody = JSON.stringify({ token, roomName, userName });
 
+        const requestBody = JSON.stringify({ token, roomName, userName });
+        console.log('[fetchRoomToken] Request body:', requestBody);
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -315,16 +326,39 @@ class App extends Component {
         }
 
         const data = await response.json();
+        console.log('[fetchRoomToken] Response:', data);
+
         return data.newToken;
     }
 
     async connectToRoom(token, roomName) {
+        if (!token) {
+            token = localStorage.getItem('token');
+            roomName = localStorage.getItem('roomName');
+        }
+        console.log('[connectToRoom] Connecting to room:', roomName);
+        console.log('[connectToRoom] Token:', token);
         return await connect(token, {
             name: roomName,
             audio: true,
-            video: { width: 640, height: 480, frameRate: 15 },
+            video: {
+                width: 640,
+                height: 480,
+                frameRate: 15,
+            },
             networkQuality: { local: 1, remote: 1 },
             maxAudioBitrate: 16000,
+        });
+    }
+
+    handleJoinRoomError(err) {
+        this.setState({ errorMessage: 'An error occurred while connecting to the room.', showErrorPage: true });
+        this.stopCamera();
+    }
+
+    stopCamera() {
+        navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then((stream) => {
+            stream.getTracks().forEach((track) => track.stop());
         });
     }
 
@@ -333,52 +367,35 @@ class App extends Component {
     }
 
     render() {
+        if (this.state.room) {
+            return <Room returnToLobby={this.returnToLobby} room={this.state.room} />;
+        }
+
+        if (this.state.showErrorPage) {
+            return (
+                <div className="error-page">
+                    <h1>Error</h1>
+                    <p>{this.state.errorMessage}</p>
+                    <a href="/">Go Back</a>
+                </div>
+            );
+        }
+
         return (
-            <Router basename="/twillio-video">
-                <Switch>
-                    {/* Auto-redirect to video call if parameters are in the URL */}
-                    <Route exact path="/">
-                        {this.state.room ? (
-                            <Redirect to="/video-call" />
-                        ) : (
-                            <Redirect to={window.location.search ? `/video-call${window.location.search}` : "/lobby"} />
-                        )}
-                    </Route>
-
-                    <Route path="/video-call">
-                        {this.state.room ? (
-                            <Room returnToLobby={this.returnToLobby} room={this.state.room} />
-                        ) : (
-                            <div className="error-page">
-                                <h1>Error</h1>
-                                <p>Invalid or missing room parameters.</p>
-                                <a href="/">Go Back</a>
-                            </div>
-                        )}
-                    </Route>
-
-                    <Route path="/lobby">
-                        <div className="lobby">
-                            <h1>Enter Room Details</h1>
-                            <input
-                                value={this.state.identity}
-                                onChange={(e) => this.setState({ identity: e.target.value })}
-                                placeholder="Your name"
-                            />
-                            <input
-                                value={this.state.roomName}
-                                onChange={(e) => this.setState({ roomName: e.target.value })}
-                                placeholder="Room name"
-                            />
-                            <button onClick={this.joinRoom}>Join Room</button>
-                        </div>
-                    </Route>
-
-                    <Route path="*">
-                        <Redirect to="/" />
-                    </Route>
-                </Switch>
-            </Router>
+            <div className="lobby">
+                <h1>Enter Room Details</h1>
+                <input
+                    value={this.state.identity}
+                    onChange={(e) => this.setState({ identity: e.target.value })}
+                    placeholder="Your name"
+                />
+                <input
+                    value={this.state.roomName}
+                    onChange={(e) => this.setState({ roomName: e.target.value })}
+                    placeholder="Room name"
+                />
+                <button onClick={this.joinRoom}>Join Room</button>
+            </div>
         );
     }
 }
