@@ -21,3 +21,22 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local configuration; commit examples, never credentials.
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+# Dependencies, generated output and editor state.
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+bin/
+obj/
+.vs/
+.idea/
+.DS_Store
+Thumbs.db

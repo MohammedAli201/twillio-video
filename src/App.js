@@ -1,7 +1,7 @@
 import './App.scss';
 import React, { Component } from 'react';
 import Room from './Room';
-export const MAIN_API_URL = "https://bariiso.com";
+export const MAIN_API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 const { connect } = require('twilio-video');
 
 class App extends Component {
@@ -25,7 +25,6 @@ class App extends Component {
     componentDidMount() {
         // Automatically join the room if URL contains the required parameters
         const urlParams = new URLSearchParams(window.location.search);
-        console.log('URL params:', urlParams.toString());
         const token = urlParams.get('token');
         const roomName = urlParams.get('roomName');
         const name = urlParams.get('Username');
@@ -54,7 +53,6 @@ class App extends Component {
             if (!token || !roomName || !userName) {
                 throw new Error('Missing required URL parameters (token, roomName, or userName).');
             }
-            console.log('[joinRoom] Parameters extracted:', { token, roomName, userName });
 
             console.log('[joinRoom] Fetching token from API...');
             const fetchedToken = await this.fetchRoomToken(token, roomName, userName);
@@ -95,7 +93,6 @@ class App extends Component {
     async fetchRoomToken(token, roomName, userName) {
         const apiUrl = `${MAIN_API_URL}/api/Doctor/resource`;
         const requestBody = JSON.stringify({ token, roomName, userName });
-        console.log('[fetchRoomToken] Request body:', requestBody);
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -117,7 +114,6 @@ class App extends Component {
         if (data.error === 'Token expired') {
             throw new Error('This link has expired.');
         }
-        console.log('[fetchRoomToken] Response:', data);
 
         // save in local storage
         localStorage.setItem('token', data.twilioToken);
@@ -135,7 +131,6 @@ class App extends Component {
             roomName = localStorage.getItem('roomName');
         }
         console.log('[connectToRoom] Connecting to room:', roomName);
-        console.log('[connectToRoom] Token:', token);
         return await connect(token, {
             name: roomName,
             audio: true,
